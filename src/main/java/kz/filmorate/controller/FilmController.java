@@ -1,10 +1,10 @@
-package controller;
+package kz.filmorate.controller;
 
 
 import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
-import model.Film;
+import kz.filmorate.model.Film;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;

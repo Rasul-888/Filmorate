@@ -1,4 +1,4 @@
-package model;
+package kz.filmorate.model;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
