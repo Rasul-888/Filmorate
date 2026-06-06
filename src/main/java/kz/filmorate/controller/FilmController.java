@@ -1,54 +1,65 @@
 package kz.filmorate.controller;
 
-
 import jakarta.validation.Valid;
-import jakarta.validation.ValidationException;
-import lombok.extern.slf4j.Slf4j;
+import kz.filmorate.exception.ValidationException;
 import kz.filmorate.model.Film;
+import kz.filmorate.service.FilmService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/films")
 @Slf4j
 public class FilmController {
-
-    private final Map<Long, Film> films = new HashMap<>();
-    private long idCounter = 1;
-
+    private final FilmService filmService;
     private static final LocalDate CINEMA_BIRTHDAY = LocalDate.of(1895, 12, 28);
+
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
+    }
 
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
         validateFilm(film);
-
-        film.setId(idCounter++);
-        films.put(film.getId(), film);
-
         log.info("Добавлен фильм: {}", film);
-        return film;
+        return filmService.addFilm(film);
     }
 
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
-        if (!films.containsKey(film.getId())) {
-            throw new ValidationException("Фильм с таким id не найден");
-        }
-
         validateFilm(film);
-        films.put(film.getId(), film);
-
         log.info("Обновлён фильм: {}", film);
-        return film;
+        return filmService.updateFilm(film);
     }
 
     @GetMapping
     public Collection<Film> getAllFilms() {
-        return films.values();
+        return filmService.getAllFilms();
+    }
+
+    @GetMapping("/{id}")
+    public Film getFilmById(@PathVariable Long id) {
+        return filmService.getFilmById(id);
+    }
+
+    @PutMapping("/{id}/like/{userId}")
+    public void addLike(@PathVariable Long id, @PathVariable Long userId) {
+        log.info("Лайк фильму {} от пользователя {}", id, userId);
+        filmService.addLike(id, userId);
+    }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    public void removeLike(@PathVariable Long id, @PathVariable Long userId) {
+        log.info("Удален лайк фильму {} от пользователя {}", id, userId);
+        filmService.removeLike(id, userId);
+    }
+
+    @GetMapping("/popular")
+    public Collection<Film> getPopularFilms(@RequestParam(defaultValue = "10") int count) {
+        return filmService.getPopularFilms(count);
     }
 
     private void validateFilm(Film film) {
